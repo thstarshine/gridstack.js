@@ -3,12 +3,14 @@
 }
 
 .grid-stack-item {
+
     position: absolute;
     padding: 0;
 }
 
 .grid-stack-item .grid-stack-item-content,
 .grid-stack-item .placeholder-content {
+	background-color: #CCC;
     margin: 0;
     position: absolute;
     top: 0;

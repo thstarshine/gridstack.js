@@ -1,0 +1,34 @@
+<html>
+<head>
+<link rel=stylesheet type="text/css" href="src/gridstack.css">
+</head>
+<body>
+<div class="grid-stack">
+    <div class="grid-stack-item" 
+        data-gs-x="0" data-gs-y="0" 
+        data-gs-width="4" data-gs-height="2">
+            <div class="grid-stack-item-content"></div>
+    </div>
+    <div class="grid-stack-item" 
+        data-gs-x="4" data-gs-y="0" 
+        data-gs-width="4" data-gs-height="4">
+            <div class="grid-stack-item-content"></div>
+    </div>
+</div>
+
+
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.11.2.js"></script>
+<script type="text/javascript" src="http://underscorejs.org/underscore-min.js"></script>
+<script type="text/javascript" src="src/jquery-ui.min.js"></script>
+<script type="text/javascript" src="src/gridstack.js"></script>
+<script type="text/javascript">
+$(function () {
+    var options = {
+        cell_height: 80,
+        vertical_margin: 10
+    };
+    $('.grid-stack').gridstack(options);
+});
+</script>
+</body>
+</html>
