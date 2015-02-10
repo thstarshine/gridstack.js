@@ -2,18 +2,43 @@
 <head>
 <link rel=stylesheet type="text/css" href="src/gridstack.css">
 </head>
-<body>
+<body style="background-color:#336666">
 <div class="grid-stack">
     <div class="grid-stack-item" 
         data-gs-x="0" data-gs-y="0" 
-        data-gs-width="4" data-gs-height="2">
-            <div class="grid-stack-item-content"></div>
+        data-gs-width="2" data-gs-height="2" data-gs-no-resize="true">
+            <div class="grid-stack-item-content">A</div>
     </div>
     <div class="grid-stack-item" 
-        data-gs-x="4" data-gs-y="0" 
-        data-gs-width="4" data-gs-height="4">
-            <div class="grid-stack-item-content"></div>
+        data-gs-x="2" data-gs-y="0" 
+        data-gs-width="4" data-gs-height="2" data-gs-no-resize="true">
+            <div class="grid-stack-item-content">B</div>
     </div>
+    <div class="grid-stack-item" 
+        data-gs-x="6" data-gs-y="0" 
+        data-gs-width="1" data-gs-height="2" data-gs-no-resize="true">
+            <div class="grid-stack-item-content">C</div>
+    </div>
+</div>
+
+<div> space </div>
+<div class="grid-stack">
+    <div class="grid-stack-item" 
+        data-gs-x="0" data-gs-y="0" 
+        data-gs-width="2" data-gs-height="2" data-gs-no-resize="true">
+            <div class="grid-stack-item-content">D</div>
+    </div>
+    <div class="grid-stack-item" 
+        data-gs-x="2" data-gs-y="0" 
+        data-gs-width="4" data-gs-height="2" data-gs-no-resize="true">
+            <div class="grid-stack-item-content">E</div>
+    </div>
+    <div class="grid-stack-item" 
+        data-gs-x="6" data-gs-y="0" 
+        data-gs-width="1" data-gs-height="2" data-gs-no-resize="true">
+            <div class="grid-stack-item-content">F</div>
+    </div>
+
 </div>
 
 
@@ -24,10 +49,13 @@
 <script type="text/javascript">
 $(function () {
     var options = {
+        animate: true,
         cell_height: 80,
-        vertical_margin: 10
+        vertical_margin: 10,
+        width: 12
     };
     $('.grid-stack').gridstack(options);
+ // $('.grid-stack-item').draggable();
 });
 </script>
 </body>

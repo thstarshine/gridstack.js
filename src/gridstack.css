@@ -1,16 +1,18 @@
 .grid-stack {
     position: relative;
+    min-height: 150px;
+    background-color: #669999;
 }
 
 .grid-stack-item {
-
+/*     min-height: 50px;*/
     position: absolute;
     padding: 0;
 }
 
 .grid-stack-item .grid-stack-item-content,
 .grid-stack-item .placeholder-content {
-	background-color: #CCC;
+    background-color: #FFFFFF;
     margin: 0;
     position: absolute;
     top: 0;
