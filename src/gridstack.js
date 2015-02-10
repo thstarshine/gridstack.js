@@ -336,7 +336,6 @@
 
         this.container = $(el);
 
-        this.groupContainer = $('.grid-stack');
 
         this.opts = _.defaults(opts || {}, {
             width: parseInt(this.container.attr('data-gs-width')) || 12,
@@ -351,52 +350,71 @@
             float: false,
             _class: 'grid-stack-' + (Math.random() * 10000).toFixed(0),
             animate: Boolean(this.container.attr('data-gs-animate')) || false,
-            always_show_resize_handle: opts.always_show_resize_handle || false
+            always_show_resize_handle: opts.always_show_resize_handle || false,
+            connectWith: null
         });
 
+        this.containerGroup = this.opts.connectWith ? $(this.opts.connectWith):this.container;
         this.container.addClass(this.opts._class);
         this._styles = Utils.create_stylesheet();
         this._styles._max = 0;
 
+        this.containerGroup.each(function(){
 
+            // don't re-define the droppable container
+            if ($(this).droppable('instance')){
+                return;
+            }
 
+            $(this).droppable({
+                accept: self.opts.connectWith+' .'+self.opts.item_class,
+                create: function(event, ui){
+                    $(this).css({'background-color':'red'});
+                    console.log("create cont group");
+                },
+                out: function(event, ui){
+                    console.log("thing moves out");
+      //              grid.placeholder.hide();
+                },
+                over: function(event, ui){
+                    console.log("new thing comes in "+$(this).attr('id'));
+    /*                var grid = ui.draggable.parent().data('gridstack');
+                    self.placeholder
+                    .attr('data-gs-x', ui.draggable.attr('data-gs-x'))
+                    .attr('data-gs-y', ui.draggable.attr('data-gs-y'))
+                    .attr('data-gs-width', ui.draggable.attr('data-gs-width'))
+                    .attr('data-gs-height', ui.draggable.attr('data-gs-height'))
+                    .show();
 
+                    ui.draggable.data('_gridstack_node').el = self.placeholder;*/
+                },
+                drop: function(event, ui) {
+                    var item = ui.draggable;
+                    if (item.parent().is($(this))){
+                        console.log("same group");
+                        return;
+                    }
 
-
-        this.xx = false;
-        $(el).droppable({
-            drop: function( event, ui ) {
-//                $(this).css({'background-color':'red'});
-//                ui.draggable.appendTo($(el));
-//                ui.draggable.parent().addClass('tbr');
-//                ui.draggable.parent().remove_widget(ui.draggable);
-                var grid = ui.draggable.parent().data('gridstack');
-                if (ui.draggable.parent().is($(el))){
-                    console.log("same group");
-                    return;
-                }
-
-                if (grid.xx===false){
-//                    grid.xx = true;
-                    var new_el = ui.draggable
+                    var old_grid = item.parent().data('gridstack');
+                    var new_grid = $(this).data('gridstack');
+                    var new_el = item
                         .removeClass('ui-draggable-dragging')
                         .removeAttr('style data-gs-x data-gs-y')
                         .find('.ui-resizable-handle').remove().end()
                         .prop('outerHTML');
-//                        .wrapAll('<div>').parent().html();
 
-                    var new_w = ui.draggable.attr('data-gs-width');
-                    var new_h = ui.draggable.attr('data-gs-height');
-                    //    grid.xx = true;
-                    self.add_widget(new_el, 0, 2, new_w, new_h, true).removeAttr('data-gs-auto-position');
-                    grid.remove_widget(ui.draggable);
-                    console.log(new_el);
+                    var new_w = item.attr('data-gs-width');
+                    var new_h = item.attr('data-gs-height');
+
+                    new_grid.add_widget(new_el, 0, 2, new_w, new_h, true).removeAttr('data-gs-auto-position');
+                    old_grid.remove_widget(item);
+                   // console.log(new_el);
+
                 }
-            }
+            });
+
+
         });
-
-
-
 
 
 

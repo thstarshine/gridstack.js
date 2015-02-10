@@ -3,7 +3,7 @@
 <link rel=stylesheet type="text/css" href="src/gridstack.css">
 </head>
 <body style="background-color:#336666">
-<div class="grid-stack">
+<div id="g1" class="grid-stack">
     <div class="grid-stack-item" 
         data-gs-x="0" data-gs-y="0" 
         data-gs-width="2" data-gs-height="2" data-gs-no-resize="true">
@@ -22,7 +22,7 @@
 </div>
 
 <div> space </div>
-<div class="grid-stack">
+<div id="g2" class="grid-stack">
     <div class="grid-stack-item" 
         data-gs-x="0" data-gs-y="0" 
         data-gs-width="2" data-gs-height="2" data-gs-no-resize="true">
@@ -49,6 +49,7 @@
 <script type="text/javascript">
 $(function () {
     var options = {
+        connectWith: '.grid-stack',
         animate: true,
         cell_height: 80,
         vertical_margin: 10,
