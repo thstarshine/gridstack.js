@@ -3,6 +3,7 @@
 <link rel=stylesheet type="text/css" href="src/gridstack.css">
 </head>
 <body style="background-color:#336666">
+<!--<div id="g1" class="grid-stack" style="width:40%; float:left;">-->
 <div id="g1" class="grid-stack">
     <div id="e1" class="grid-stack-item" 
         data-gs-x="0" data-gs-y="0" 
@@ -21,7 +22,8 @@
     </div>
 </div>
 
-<div> space </div>
+<div style="height:100px"> space </div>
+<!--<div id="g2" class="grid-stack" style="width:40%; float:right;">-->
 <div id="g2" class="grid-stack">
     <div id="e4" class="grid-stack-item" 
         data-gs-x="0" data-gs-y="0" 
@@ -42,12 +44,22 @@
 </div>
 
 
+<div id="test2" style="background-color:green">test2</div>
+<div id="test1" style="background-color:blue">test1</div>
+
 <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.2.js"></script>
 <script type="text/javascript" src="http://underscorejs.org/underscore-min.js"></script>
 <script type="text/javascript" src="src/jquery-ui.min.js"></script>
 <script type="text/javascript" src="src/gridstack.js"></script>
 <script type="text/javascript">
 $(function () {
+    $('#test1').draggable();
+    $('#test2').droppable({
+        over: function(event, ui){
+            $(this).css({'height': '100px'});
+        }
+    });
+
     var options = {
         connectWith: '.grid-stack',
         animate: true,
