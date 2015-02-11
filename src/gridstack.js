@@ -240,8 +240,6 @@
     GridStackEngine.prototype.can_move_node = function (node, x, y, width, height) {
         var has_locked = Boolean(_.find(this.nodes, function (n) { return n.locked }));
 
-    //    console.log("this.height:"+this.height+" locked:"+has_locked);
-
         if (!this.height && !has_locked)
             return true;
 
@@ -380,20 +378,40 @@
 
                 var previous_gridstack = node.previous_gridstack;
                 var current_gridstack  = $(this).data('gridstack');
+
                 node.current_gridstack = current_gridstack;
+                console.log("over, prev:"+node.previous_gridstack.container.attr('id')+" cur:"+node.current_gridstack.container.attr('id'))
                 if (current_gridstack === previous_gridstack){
                     console.log("in group moving");
                     return;
                 }
 
-                console.log("over, prev:"+node.previous_gridstack.container.attr('id')+" cur:"+node.current_gridstack.container.attr('id'))
+                // add new node class , bind to dragging item
+                var new_node = current_gridstack.grid.add_node({
+                    x: node.x,
+                    y: node.y,
+                    width: node.width,
+                    height: node.height,
+                    max_width: node.max_width,
+                    min_width: node.min_width,
+                    max_height: node.max_height,
+                    min_height: node.min_height,
+                    auto_position: node.auto_position,
+                    no_resize: node.no_resize,
+                    no_move: node.no_move,
+                    locked: node.locked,
+                    el: current_gridstack.placeholder,
+                    movein_x: 0,
+                    movein_y: ui.position.top+(gridstack.cell_height * node.height ),
+                    previous_gridstack: node.previous_gridstack,
+                    current_gridstack: node.current_gridstack
+                });
+                item.data('_gridstack_node', new_node);
+                previous_gridstack.grid.remove_node(node);
+console.log(ui.position.top);
 
-                current_gridstack.grid.add_node(node);
-                node.el = current_gridstack.placeholder;
-
+                // placeholder change
                 previous_gridstack.placeholder
-                .attr('data-gs-x', 20)
-                .attr('data-gs-y', 0)
                 .attr('data-gs-width', 0)
                 .attr('data-gs-height', 0)
                 .hide();
@@ -405,36 +423,23 @@
                 .attr('data-gs-height', item.attr('data-gs-height'))
                 .show();
 
-               // previous_gridstack.grid.remove_node(node);
 
                 console.log(current_gridstack.grid.nodes.length);
             },
             drop: function(event, ui) {
                 var item = ui.draggable;
                 var node = item.data('_gridstack_node');
-                if (item.parent().is($(this))){
-                    console.log("drop to original group");
+
+                console.log("dropped");
+                var previous_gridstack = node.previous_gridstack;
+                var current_gridstack  = $(this).data('gridstack');
+                if (current_gridstack === previous_gridstack){
+                    console.log("no cross moving");
                     return;
                 }
 
-                var previous_gridstack = node.previous_gridstack;
-                var current_gridstack  = $(this).data('gridstack');
-                var new_el = item
-                    .removeClass('ui-draggable-dragging')
-                    .removeAttr('style data-gs-x data-gs-y')
-                    .find('.ui-resizable-handle').remove().end()
-                    .prop('outerHTML');
 
-                var new_w = item.attr('data-gs-width');
-                var new_h = item.attr('data-gs-height');
 
-current_gridstack.grid.remove_node(node);
-                current_gridstack.add_widget(new_el, 
-                    current_gridstack.placeholder.attr('data-gs-x'), 
-                    current_gridstack.placeholder.attr('data-gs-y'), 
-                    new_w, new_h, false).removeAttr('data-gs-auto-position');
-                previous_gridstack.remove_widget(item);
-               // console.log(new_el);
 
             }
         });
@@ -574,43 +579,92 @@ current_gridstack.grid.remove_node(node);
             no_move: Utils.toBool(el.attr('data-gs-no-move')),
             locked: Utils.toBool(el.attr('data-gs-locked')),
             el: el,
+            movein_x: 0,                // record position when moving into new container
+            movein_y: 0,
             previous_gridstack: self,
-            current_gridstack: self    // point to parent GridStack instance (may change during dragging)
+            current_gridstack: self     // point to parent GridStack instance (may change during dragging)
         });
         el.data('_gridstack_node', node);
-
 
         var cell_width, cell_height;
 
         var on_start_moving = function (event, ui) {
-            var o = $(this);
-            self.grid.clean_nodes();
-            self.grid.begin_update(node);
+            var o = ui.helper;//$(this);
+            var n = o.data('_gridstack_node');
+            var gridstack = n.current_gridstack;
+
+            gridstack.grid.clean_nodes();
+            gridstack.grid.begin_update(node);
             cell_width = Math.ceil(o.outerWidth() / o.attr('data-gs-width'));
-            cell_height = self.opts.cell_height + self.opts.vertical_margin;
-            self.placeholder
+            cell_height = gridstack.opts.cell_height + gridstack.opts.vertical_margin;
+            gridstack.placeholder
                 .attr('data-gs-x', o.attr('data-gs-x'))
                 .attr('data-gs-y', o.attr('data-gs-y'))
                 .attr('data-gs-width', o.attr('data-gs-width'))
                 .attr('data-gs-height', o.attr('data-gs-height'))
                 .show();
-            node.el = self.placeholder;
+            node.el = gridstack.placeholder;
         };
 
         var on_end_moving = function (event, ui) {
-            var o = $(this);
-            node.el = o;
-            self.placeholder.hide();
-            o
-                .attr('data-gs-x', node.x)
-                .attr('data-gs-y', node.y)
-                .attr('data-gs-width', node.width)
-                .attr('data-gs-height', node.height)
-                .removeAttr('style');
-            self._update_container_height();
-            self.container.trigger('change', [self.grid.get_dirty_nodes()]);
+            var o = ui.helper;//$(this);
+            var n = o.data('_gridstack_node');
+//            if (!n){ return; }  // widget deleted in drop()
+            var gridstack = n.current_gridstack;
+            n.el = o;
 
-            self.grid.end_update();
+
+
+            var item = ui.helper;
+            var n = item.data('_gridstack_node');
+            var previous_gridstack = n.previous_gridstack;
+            var current_gridstack  = n.current_gridstack;
+
+            if (item.parent().is($(this))){
+                node.previous_gridstack = node.current_gridstack;   // back to original state
+
+                gridstack.placeholder.hide();
+                o
+                    .attr('data-gs-x', n.x)
+                    .attr('data-gs-y', n.y)
+                    .attr('data-gs-width', n.width)
+                    .attr('data-gs-height', n.height)
+                    .removeAttr('style');
+                gridstack._update_container_height();
+                gridstack.container.trigger('change', [gridstack.grid.get_dirty_nodes()]);
+
+                gridstack.grid.end_update();
+
+                console.log("final drop to original group");
+                return;
+            }
+
+            var new_el = item
+                .removeClass('ui-draggable-dragging')
+                .removeAttr('style data-gs-x data-gs-y')
+                .find('.ui-resizable-handle').remove().end()
+                .prop('outerHTML');
+
+            var new_w = item.attr('data-gs-width');
+            var new_h = item.attr('data-gs-height');
+
+            var new_item = current_gridstack.add_widget(new_el, 
+                current_gridstack.placeholder.attr('data-gs-x'), 
+                current_gridstack.placeholder.attr('data-gs-y'), 
+                new_w, new_h, false).removeAttr('data-gs-auto-position');
+            previous_gridstack.remove_widget(item);
+            new_item.data('_gridstack_node').el = o;
+           // console.log(new_el);
+
+            current_gridstack._update_container_height();
+            previous_gridstack._update_container_height();
+
+            current_gridstack.placeholder.hide();
+            current_gridstack.container.trigger('change', [current_gridstack.grid.get_dirty_nodes()]);
+
+            previous_gridstack.grid.end_update();
+            current_gridstack.grid.end_update();
+
         };
 
         el.draggable({
@@ -621,13 +675,15 @@ current_gridstack.grid.remove_node(node);
             start: on_start_moving,
             stop: on_end_moving,
             drag: function (event, ui) {
-                var gridstack = $(this).data('_gridstack_node').current_gridstack;
-                var x = Math.round(ui.position.left / cell_width),
-                    y = Math.floor((ui.position.top + cell_height/2) / cell_height);
-                if (!gridstack.grid.can_move_node(node, x, y, node.width, node.height)) {
+                var n = $(this).data('_gridstack_node');
+                var gridstack = n.current_gridstack;
+                var x = Math.round((ui.position.left-n.movein_x) / cell_width),
+                    y = Math.floor(((ui.position.top-n.movein_y) + cell_height/2) / cell_height);
+                if (!gridstack.grid.can_move_node(n, x, y, n.width, n.height)) {
                     return;
                 }
-                gridstack.grid.move_node(node, x, y);
+                console.log(ui.position.left+" "+ui.position.top+" "+(ui.position.top-n.movein_y)+" "+x+" "+y);
+                gridstack.grid.move_node(n, x, y);
                 gridstack._update_container_height();
             }
         }).resizable({
