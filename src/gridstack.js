@@ -360,6 +360,7 @@
         this._styles = Utils.create_stylesheet();
         this._styles._max = 0;
 
+        this.update_height_diff = 0;    // record height difference when doing update 
 
         this.container.droppable({
             accept: self.opts.connectWith + ' .' + self.opts.item_class,
@@ -530,8 +531,16 @@
     };
 
     GridStack.prototype._update_container_height = function () {
-//        console.log(this.container.attr('id')+" grid height: "+this.grid.get_grid_height());
-        this.container.height(this.grid.get_grid_height() * (this.opts.cell_height + this.opts.vertical_margin) - this.opts.vertical_margin);
+        var old_height = this.container.height();
+        var new_height = this.grid.get_grid_height() * (this.opts.cell_height + this.opts.vertical_margin) - this.opts.vertical_margin;
+
+        if (this.grid.get_grid_height() !== this.grid_height){
+            this.update_height_diff += new_height-old_height;
+            console.log(this.update_height_diff);
+            this.grid_height = this.grid.get_grid_height();
+        }
+        console.log(this.container.attr('id')+" grid height: "+this.grid.get_grid_height()+" "+"new:"+new_height+" old:"+old_height);
+        this.container.height(new_height);
     };
 
     GridStack.prototype._is_one_column_mode = function () {
@@ -585,16 +594,24 @@
         el = $(el);
 
         var cell_width, cell_height;
+            cell_width = Math.ceil(el.outerWidth() / el.attr('data-gs-width'));
+            cell_height = this.opts.cell_height + this.opts.vertical_margin;
 
         var on_start_moving = function (event, ui) {
-            var item = ui.helper;//$(this);
+            $(this).hide();
+            var item = $(this);//ui.helper;//$(this);
             var node = item.data('_gridstack_node');
             var gridstack = node.current_gridstack;
 
+
+//            $(this).option({'cursorAt': {top: 50, left:50}}), 
+
+
+
             gridstack.grid.clean_nodes();
             gridstack.grid.begin_update(node);
-            cell_width = Math.ceil(item.outerWidth() / item.attr('data-gs-width'));
-            cell_height = gridstack.opts.cell_height + gridstack.opts.vertical_margin;
+//            cell_width = Math.ceil(item.outerWidth() / item.attr('data-gs-width'));
+//            cell_height = gridstack.opts.cell_height + gridstack.opts.vertical_margin;
             gridstack.placeholder
                 .attr('data-gs-x', item.attr('data-gs-x'))
                 .attr('data-gs-y', item.attr('data-gs-y'))
@@ -605,7 +622,7 @@
         };
 
         var on_end_moving = function (event, ui) {
-            var item = ui.helper;
+            var item = $(this);//ui.helper;
             var node = item.data('_gridstack_node');
             var previous_gridstack = node.previous_gridstack;
             var current_gridstack  = node.current_gridstack;
@@ -627,9 +644,9 @@
 
                 gridstack._update_container_height();
                 gridstack.container.trigger('change', [gridstack.grid.get_dirty_nodes()]);
-
                 gridstack.grid.end_update();
-                previous_gridstack._update_container_height();
+
+//                previous_gridstack._update_container_height();
                 console.log("final drop to original group");
                 return;
             }
@@ -653,25 +670,42 @@
             //new_item.data('_gridstack_node', node);//.el = o;
            // console.log(new_el);
 
-            console.log("current update height");
-            current_gridstack._update_container_height();
-            console.log("previous update height");
-            previous_gridstack._update_container_height();
+//            console.log("current update height");
+//            current_gridstack._update_container_height();
+//            console.log("previous update height");
+//            previous_gridstack._update_container_height();
 
             console.log(previous_gridstack.container.attr('id')+" node len:"+previous_gridstack.grid.nodes.length);
             console.log(current_gridstack.container.attr('id')+" node len:"+current_gridstack.grid.nodes.length);
+
+            current_gridstack.update_height_diff = 0;
+            previous_gridstack.update_height_diff = 0;
 
             current_gridstack.placeholder.hide();
             current_gridstack.container.trigger('change', [current_gridstack.grid.get_dirty_nodes()]);
 
             previous_gridstack.grid.end_update();
             current_gridstack.grid.end_update();
+            $(this).show();
 
         };
 
         el.draggable({
             handle: this.opts.handle,
             scroll: true,
+//            cursorAt: function(){
+
+//                return {top: 10, left: 50}
+//            },
+            helper: function(){
+                var item = $(this);//ui.helper;
+                var node = item.data('_gridstack_node');
+                var gridstack  = node.current_gridstack;
+
+                var width = cell_width * item.attr('data-gs-width');
+                var height = cell_height * item.attr('data-gs-height');
+                return $(this).clone().css({'width':width, 'height':height});
+            },
             appendTo: 'body',
 
             start: on_start_moving,
@@ -680,18 +714,21 @@
                 var node = $(this).data('_gridstack_node');
                 var gridstack = node.current_gridstack;
 
-                var left = ui.offset.left-gridstack.container.offset().left;
-                var top  = ui.offset.top-gridstack.container.offset().top;
+                var height_diff = gridstack.update_height_diff;
+                //ui.position.top -= height_diff;
+                var left = ui.offset.left - gridstack.container.offset().left;
+                var top  = ui.offset.top - gridstack.container.offset().top;
 
                 var x = Math.round(left / cell_width),
                     y = Math.floor((top + cell_height/2) / cell_height);
                 if (!gridstack.grid.can_move_node(node, x, y, node.width, node.height)) {
                     return;
                 }
-                console.log("new left:"+left+" "+
+                console.log("height diff:"+height_diff+" "+
+                            "new left:"+left+" "+
                             "new top:"+top+" "+
-                            "left:"+ui.position.left+" "+
-                            "top:"+ui.position.top+" "+
+                            "left:"+ui.offset.left+" "+
+                            "top:"+ui.offset.top+" "+
                             "x:"+x+" "+"y:"+y);
                 gridstack.grid.move_node(node, x, y);
                 gridstack._update_container_height();
