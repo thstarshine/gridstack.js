@@ -114,6 +114,7 @@ $(function () {
 - `placeholder_class` - class for placeholder (default: `'grid-stack-placeholder'`)
 - `vertical_margin` - vertical gap size (default: `20`)
 - `width` - amount of columns (default: `12`)
+- `connectWith` - selector of connected container (default: ``)
 
 ## Grid attributes
 

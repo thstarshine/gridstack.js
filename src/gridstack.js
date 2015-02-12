@@ -344,18 +344,22 @@
             auto: true,
             min_width: 768,
             float: false,
-            _class: 'grid-stack-' + (Math.random() * 10000).toFixed(0),
             animate: Boolean(this.container.attr('data-gs-animate')) || false,
             always_show_resize_handle: opts.always_show_resize_handle || false,
-            connectWith: null
+            connectWith: ''
         });
 
+        this.opts._class = 'grid-stack-' + (Math.random() * 10000).toFixed(0);  // generate runtime
         this.container.addClass(this.opts._class);
         this._styles = Utils.create_stylesheet();
         this._styles._max = 0;
 
+        var accept_class = (self.opts.connectWith)?
+            this.opts.connectWith + ' .' + self.opts.item_class :
+            '.' + this.opts._class + ' .' + self.opts.item_class;
+
         this.container.droppable({
-            accept: self.opts.connectWith + ' .' + self.opts.item_class,
+            accept: accept_class,
             out: function(event, ui){
             },
             over: function(event, ui){

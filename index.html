@@ -45,25 +45,12 @@
 </div>
 
 
-<div id="test2" style="background-color:green">test2</div>
-<div id="test1" style="background-color:blue">test1</div>
-
 <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.2.js"></script>
 <script type="text/javascript" src="http://underscorejs.org/underscore-min.js"></script>
 <script type="text/javascript" src="src/jquery-ui.min.js"></script>
 <script type="text/javascript" src="src/gridstack.js"></script>
 <script type="text/javascript">
 $(function () {
-    $('#test1').draggable({
-            helper: 'clone',
-            appendTo: 'body'
-
-    });
-    $('#test2').droppable({
-        over: function(event, ui){
-            $(this).css({'height': '100px'});
-        }
-    });
 
     var options = {
         connectWith: '.grid-stack',
@@ -73,7 +60,7 @@ $(function () {
         width: 12
     };
     $('.grid-stack').gridstack(options);
- // $('.grid-stack-item').draggable();
+
 });
 </script>
 </body>
