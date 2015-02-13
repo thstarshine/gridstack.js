@@ -648,7 +648,6 @@
 
             previous_gridstack.grid.end_update();
             current_gridstack.grid.end_update();
-            item.show();
         };
 
         el.draggable({
