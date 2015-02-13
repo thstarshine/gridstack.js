@@ -24,6 +24,9 @@ Inspired by [gridster.js](http://gridster.net). Built with love.
     - [ondragstop(event, ui)](#ondragstopevent-ui)
     - [onresizestart(event, ui)](#onresizestartevent-ui)
     - [onresizestop(event, ui)](#onresizestopevent-ui)
+    - [ondrop(event, ui)](#ondropevent-ui)
+    - [onitemremove(item)](#onitemremoveitem)
+
   - [API](#api)
     - [add_widget(el, x, y, width, height, auto_position)](#add_widgetel-x-y-width-height-auto_position)
     - [cell_height()](#cell_height)
@@ -196,7 +199,6 @@ $('.grid-stack').on('drop', function (event, ui) {
     var element = event.target;
 });
 ```
-
 ### onitemremove(item)
 
 Occurs when widgets being dropped to the new container
