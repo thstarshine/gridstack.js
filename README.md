@@ -186,7 +186,26 @@ $('.grid-stack').on('resizestop', function (event, ui) {
     var element = event.target;
 });
 ```
+### ondrop(event, ui)
 
+Occurs when widgets being dropped to this container
+
+```javascript
+$('.grid-stack').on('drop', function (event, ui) {
+    var grid = this;
+    var element = event.target;
+});
+```
+
+### onitemremove(item)
+
+Occurs when widgets being dropped to the new container
+
+```javascript
+$('.grid-stack').on('itemremove', function (e, item) {
+    var grid = item;
+});
+```
 
 ## API
 

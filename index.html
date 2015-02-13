@@ -3,8 +3,8 @@
 <link rel=stylesheet type="text/css" href="src/gridstack.css">
 </head>
 <body style="background-color:#336666">
-<div id="g1" class="grid-stack" style="width:70%;">
-<!--<div id="g1" class="grid-stack">-->
+
+<div id="g1" class="grid-stack grid-stack-a" style="width:45%; float:left">
     <div id="e1" class="grid-stack-item" 
         data-gs-x="0" data-gs-y="0" 
         data-gs-width="6" data-gs-height="2" data-gs-no-resize="false">
@@ -23,9 +23,7 @@
     </div>-->
 </div>
 
-<div style="height:100px"> space </div>
-<div id="g2" class="grid-stack" style="width:70%;">
-<!--<div id="g2" class="grid-stack">-->
+<div id="g2" class="grid-stack grid-stack-a" style="width:45%; float:right;">
     <div id="e4" class="grid-stack-item" 
         data-gs-x="0" data-gs-y="0" 
         data-gs-width="6" data-gs-height="2" data-gs-no-resize="false">
@@ -41,9 +39,35 @@
         data-gs-width="6" data-gs-height="2" data-gs-no-resize="false">
             <div class="grid-stack-item-content">F</div>
     </div>
-
 </div>
 
+<div style="height:100px; clear:both"> space </div>
+
+<div id="g3" class="grid-stack grid-stack-b" style="width:45%; float:left;">
+    <div id="e7" class="grid-stack-item" 
+        data-gs-x="0" data-gs-y="0" 
+        data-gs-width="6" data-gs-height="2" data-gs-no-resize="false">
+            <div class="grid-stack-item-content">G</div>
+    </div>
+    <div id="e8" class="grid-stack-item" 
+        data-gs-x="6" data-gs-y="0" 
+        data-gs-width="6" data-gs-height="2" data-gs-no-resize="false">
+            <div class="grid-stack-item-content">H</div>
+    </div>
+</div>
+
+<div id="g4" class="grid-stack grid-stack-b" style="width:45%; float:right; clear:right">
+    <div id="e9" class="grid-stack-item" 
+        data-gs-x="0" data-gs-y="0" 
+        data-gs-width="6" data-gs-height="2" data-gs-no-resize="false">
+            <div class="grid-stack-item-content">I</div>
+    </div>
+    <div id="e10" class="grid-stack-item" 
+        data-gs-x="6" data-gs-y="0" 
+        data-gs-width="6" data-gs-height="2" data-gs-no-resize="false">
+            <div class="grid-stack-item-content">J</div>
+    </div>
+</div>
 
 <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.2.js"></script>
 <script type="text/javascript" src="http://underscorejs.org/underscore-min.js"></script>
@@ -53,13 +77,17 @@
 $(function () {
 
     var options = {
-        connectWith: '.grid-stack',
         animate: true,
         cell_height: 50,
         vertical_margin: 10,
         width: 12
     };
-    $('.grid-stack').gridstack(options);
+
+    options.connectWith = '.grid-stack-a';
+    $('.grid-stack-a').gridstack(options);
+
+    options.connectWith = '.grid-stack-b';
+    $('.grid-stack-b').gridstack(options);
 
 });
 </script>

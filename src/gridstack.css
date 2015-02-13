@@ -1,6 +1,11 @@
 .grid-stack {
     position: relative;
     min-height: 150px;
+}
+.grid-stack-b {
+    background-color: #339966;
+}
+.grid-stack-a {
     background-color: #669999;
 }
 

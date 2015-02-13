@@ -414,6 +414,13 @@
                 previous_gridstack._update_container_height();
             },
             drop: function(event, ui) {
+                var item = ui.draggable;
+                var node = item.data('_gridstack_node');
+                if (node.current_gridstack === node.original_gridstack){
+                    // drop to original container
+                    return;
+                }
+                node.original_gridstack.container.trigger('itemremove', item);
             }
         });
 
