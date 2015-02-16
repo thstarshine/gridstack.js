@@ -372,7 +372,7 @@
                 node.previous_gridstack = node.current_gridstack;
                 node.current_gridstack  = current_gridstack;
                 var previous_gridstack  = node.previous_gridstack;
-                
+
                 if (current_gridstack === previous_gridstack){
                     // in group moving
                     return;
@@ -421,7 +421,7 @@
                     // drop to original container
                     return;
                 }
-                
+
             }
         });
 
@@ -637,8 +637,8 @@
             if(!self.opts.only_pass_info_to_dropped_gridstack){
                 current_gridstack.
                     add_widget(
-                        new_item, 
-                        current_gridstack.placeholder.attr('data-gs-x'), 
+                        new_item,
+                        current_gridstack.placeholder.attr('data-gs-x'),
                         current_gridstack.placeholder.attr('data-gs-y'),
                         item.attr('data-gs-width'),
                         item.attr('data-gs-height'),
@@ -646,8 +646,8 @@
                     removeAttr('data-gs-auto-position');
                 previous_gridstack.remove_widget(item);
             }
-            
-            
+
+
 
             current_gridstack.placeholder.hide();
             current_gridstack.container.trigger('change', [current_gridstack.grid.get_dirty_nodes()]);
@@ -707,7 +707,7 @@
             }
         });
 
-    }
+    };
 
 
     GridStack.prototype.set_animation = function (enable) {
@@ -742,7 +742,11 @@
         el = $(el);
         var node = el.data('_gridstack_node');
         this.grid.remove_node(node);
-        el.remove();
+        if(this.opts.only_pass_info_to_dropped_gridstack){
+            el.hide();
+        }else{
+            el.remove();
+        }
         this._update_container_height();
     };
 
