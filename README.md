@@ -118,7 +118,7 @@ $(function () {
 - `vertical_margin` - vertical gap size (default: `20`)
 - `width` - amount of columns (default: `12`)
 - `connectWith` - selector of connected container (default: ``)
-
+- `only_pass_info_to_dropped_gridstack` - only pass item info (no dom change)
 ## Grid attributes
 
 - `data-gs-animate` - turns animation on 

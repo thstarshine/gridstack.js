@@ -346,7 +346,8 @@
             float: false,
             animate: Boolean(this.container.attr('data-gs-animate')) || false,
             always_show_resize_handle: opts.always_show_resize_handle || false,
-            connectWith: ''
+            connectWith: '',
+            only_pass_info_to_dropped_gridstack : opts.only_pass_info_to_dropped_gridstack || false
         });
 
         this.opts._class = 'grid-stack-' + (Math.random() * 10000).toFixed(0);  // generate runtime
@@ -420,7 +421,7 @@
                     // drop to original container
                     return;
                 }
-                node.original_gridstack.container.trigger('itemremove', item);
+                
             }
         });
 
@@ -632,7 +633,9 @@
                 .prop('outerHTML');
 
             current_gridstack.grid.remove_node(node);   // delete temp node
-            current_gridstack.
+
+            if(!self.opts.only_pass_info_to_dropped_gridstack){
+                current_gridstack.
                     add_widget(
                         new_item, 
                         current_gridstack.placeholder.attr('data-gs-x'), 
@@ -641,13 +644,19 @@
                         item.attr('data-gs-height'),
                         false).
                     removeAttr('data-gs-auto-position');
-            previous_gridstack.remove_widget(item);
+                previous_gridstack.remove_widget(item);
+            }
+            
+            
 
             current_gridstack.placeholder.hide();
             current_gridstack.container.trigger('change', [current_gridstack.grid.get_dirty_nodes()]);
 
             previous_gridstack.grid.end_update();
             current_gridstack.grid.end_update();
+            item.show();
+            original_gridstack.container.trigger('itemremove', item);
+            current_gridstack.container.trigger('itemadd',item);
         };
 
         el.draggable({
