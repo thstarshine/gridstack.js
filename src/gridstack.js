@@ -339,6 +339,7 @@
             item_class: 'grid-stack-item',
             placeholder_class: 'grid-stack-placeholder',
             handle: '.grid-stack-item-content',
+            cell_width: 0,  // init this field later
             cell_height: 60,
             vertical_margin: 20,
             auto: true,
@@ -349,6 +350,7 @@
             connectWith: '',
             only_pass_info_to_dropped_gridstack : opts.only_pass_info_to_dropped_gridstack || false
         });
+        this.opts.cell_width = this.cell_width();
 
         this.opts._class = 'grid-stack-' + (Math.random() * 10000).toFixed(0);  // generate runtime
         this.container.addClass(this.opts._class);
@@ -464,6 +466,8 @@
         this.container.height((this.grid.get_grid_height()) * (this.opts.cell_height + this.opts.vertical_margin) - this.opts.vertical_margin);
 
         var on_resize_handler = function () {
+            self.opts.cell_width = self.cell_width();
+
             if (self._is_one_column_mode()) {
                 if (one_column_mode)
                     return;
@@ -577,9 +581,6 @@
         var self = this;
         el = $(el);
 
-        var cell_width = Math.ceil(el.outerWidth() / el.attr('data-gs-width'));
-        var cell_height = this.opts.cell_height + this.opts.vertical_margin;
-
         var on_start_moving = function (event, ui) {
             var item = $(this);
             var node = item.data('_gridstack_node');
@@ -664,8 +665,8 @@
             scroll: true,
             helper: function () {
                 var item = $(this);
-                var width = cell_width * item.attr('data-gs-width');
-                var height = cell_height * item.attr('data-gs-height');
+                var width = self.opts.cell_width * item.attr('data-gs-width');
+                var height = self.opts.cell_height * item.attr('data-gs-height');
                 return item.clone().css({'width':width, 'height':height});
             },
             appendTo: 'body',
@@ -677,8 +678,8 @@
 
                 var left = ui.offset.left - gridstack.container.offset().left;
                 var top  = ui.offset.top - gridstack.container.offset().top;
-                var x = Math.round(left / cell_width),
-                    y = Math.floor((top + cell_height/2) / cell_height);
+                var x = Math.round(left / self.opts.cell_width);
+                    y = Math.floor((top + self.opts.cell_height/2) / self.opts.cell_height);
                 if (!gridstack.grid.can_move_node(node, x, y, node.width, node.height)) {
                     return;
                 }
@@ -697,8 +698,8 @@
                 var node = $(this).data('_gridstack_node');
                 var gridstack = node.current_gridstack;
 
-                var width = Math.round(ui.size.width / cell_width),
-                    height = Math.round(ui.size.height / cell_height);
+                var width = Math.round(ui.size.width / self.opts.cell_width);
+                    height = Math.round(ui.size.height / self.opts.cell_height);
                 if (!gridstack.grid.can_move_node(node, node.x, node.y, width, height)) {
                     return;
                 }
