@@ -32,6 +32,8 @@ Inspired by [gridster.js](http://gridster.net). Built with love.
     - [cell_height()](#cell_height)
     - [cell_height(val)](#cell_heightval)
     - [cell_width()](#cell_width)
+    - [disable()](#disable)
+    - [enable()](#enable)
     - [get_cell_from_pixel(position)](#get_cell_from_pixelposition)
     - [locked(el, val)](#lockedel-val)
     - [remove_widget(el)](#remove_widgetel)
@@ -46,7 +48,10 @@ Inspired by [gridster.js](http://gridster.net). Built with love.
   - [Touch devices support](#touch-devices-support)
   - [Use with knockout.js](#use-with-knockoutjs)
   - [Change grid width](#change-grid-width)
+  - [Save grid to array](#save-grid-to-array)
   - [Load grid from array](#load-grid-from-array)
+  - [Override resizable/draggable options](#override-resizabledraggable-options)
+  - [IE8 support](#ie8-support)
 - [Changes](#changes)
       - [v0.2.3 (development version)](#v023-development-version)
       - [v0.2.2 (2014-12-23)](#v022-2014-12-23)
@@ -109,12 +114,14 @@ $(function () {
 - `animate` - turns animation on (default: `false`)
 - `auto` - if `false` it tells to do not initialize existing items (default: `true`)
 - `cell_height` - one cell height (default: `60`)
+- `draggable` - allows to owerride jQuery UI draggable options. (default: `{handle: '.grid-stack-item-content', scroll: true, appendTo: 'body'}`) 
 - `handle` - draggable handle selector (default: `'.grid-stack-item-content'`)
 - `height` - maximum rows amount. Default is `0` which means no maximum rows
 - `float` - enable floating widgets (default: `false`)
 - `item_class` - widget class (default: `'grid-stack-item'`)
 - `min_width` - minimal width. If window width is less grid will be shown in one-column mode (default: `768`)
 - `placeholder_class` - class for placeholder (default: `'grid-stack-placeholder'`)
+- `resizable` - allows to owerride jQuery UI resizable options. (default: `{autoHide: true, handles: 'se'}`)
 - `vertical_margin` - vertical gap size (default: `20`)
 - `width` - amount of columns (default: `12`)
 - `connectWith` - selector of connected container (default: ``)
@@ -249,6 +256,24 @@ grid.cell_height(grid.cell_width() * 1.2);
 
 Gets current cell width.
 
+### disable()
+
+Disables widgets moving/resizing. This is a shortcut for:
+
+```javascript
+grid.movable('.grid-stack-item', false);
+grid.resizable('.grid-stack-item', false);
+```
+
+### enable()
+
+Enables widgets moving/resizing. This is a shortcut for:
+
+```javascript
+grid.movable('.grid-stack-item', true);
+grid.resizable('.grid-stack-item', true);
+```
+
 ### get_cell_from_pixel(position)
 
 Get the position of the cell under a pixel on screen.
@@ -372,22 +397,17 @@ ko.components.register('dashboard-grid', {
                 this.widgets = controller.widgets;
 
                 this.afterAddWidget = function (items) {
-                    _.each(items, function (item) {
-                        item = $(item);
-                        if (item.data('_gridstack_node') || item[0].nodeType != 1)
-                            return;
+                    if (grid == null) {
+                        grid = $(componentInfo.element).find('.grid-stack').gridstack({
+                            auto: false
+                        }).data('gridstack');
+                    }
 
-                        if (grid == null) {
-                            grid = $(componentInfo.element).find('.grid-stack').gridstack({
-                                auto: false
-                            }).data('gridstack');
-                        }
-
-                        grid.add_widget(item);
-                        ko.utils.domNodeDisposal.addDisposeCallback(item[0], function () {
-                            grid.remove_widget(item);
-                        });
-                    }, this);
+                    var item = _.find(items, function (i) { return i.nodeType == 1 });
+                    grid.add_widget(item);
+                    ko.utils.domNodeDisposal.addDisposeCallback(item, function () {
+                        grid.remove_widget(item);
+                    });
                 };
             };
 
@@ -397,11 +417,11 @@ ko.components.register('dashboard-grid', {
     template:
         [
             '<div class="grid-stack" data-bind="foreach: {data: widgets, afterRender: afterAddWidget}">',
-            '   <div class="grid-stack-item" data-bind="attr: {\'data-gs-x\': $data.x, \'data-gs-y\': $data.y, \'data-gs-width\': $data.width, \'data-gs-height\': $data.height}">',
-            '       <div class="grid-stack-item-content" data-bind="text: $index"></div>',
+            '   <div class="grid-stack-item" data-bind="attr: {\'data-gs-x\': $data.x, \'data-gs-y\': $data.y, \'data-gs-width\': $data.width, \'data-gs-height\': $data.height, \'data-gs-auto-position\': $data.auto_position}">',
+            '       <div class="grid-stack-item-content">...</div>',
             '   </div>',
-            '</div>'
-        ].join('\n')
+            '</div> '
+        ].join('')
 });
 
 $(function () {
@@ -426,7 +446,22 @@ and HTML:
 <div data-bind="component: {name: 'dashboard-grid', params: $data}"></div>
 ```
 
-See [example](http://troolee.github.io/gridstack.js/demo/knockout.html).
+See examples: [example 1](http://troolee.github.io/gridstack.js/demo/knockout.html), [example 2](http://troolee.github.io/gridstack.js/demo/knockout2.html).
+
+**Notes:** It's very important to exclude training spaces after widget template:
+
+```
+template:
+    [
+        '<div class="grid-stack" data-bind="foreach: {data: widgets, afterRender: afterAddWidget}">',
+        '   <div class="grid-stack-item" data-bind="attr: {\'data-gs-x\': $data.x, \'data-gs-y\': $data.y, \'data-gs-width\': $data.width, \'data-gs-height\': $data.height, \'data-gs-auto-position\': $data.auto_position}">',
+        '       ....',
+        '   </div>', // <-- NO SPACE **AFTER** </div>
+        '</div> '    // <-- NO SPACE **BEFORE** </div>
+    ].join('')       // <-- JOIN WITH **EMPTY** STRING 
+```
+
+Otherwise `addDisposeCallback` won't work.
 
 
 ## Change grid width
@@ -460,6 +495,46 @@ For 4-column grid it should be:
 
 and so on.
 
+Here is a SASS code snipped which can make life easier (Thanks to @ascendantofrain, [#81](https://github.com/troolee/gridstack.js/issues/81)):
+
+```sass
+.grid-stack-item {
+
+    $gridstack-columns: 12;
+
+    @for $i from 1 through $gridstack-columns {
+        &[data-gs-width='#{$i}'] { width: (100% / $gridstack-columns) * $i; }
+        &[data-gs-x='#{$i}'] { left: (100% / $gridstack-columns) * $i; }
+        &.grid-stack-item[data-gs-min-width='#{$i}'] { min-width: (100% / $gridstack-columns) * $i; }
+        &.grid-stack-item[data-gs-max-width='#{$i}'] { max-width: (100% / $gridstack-columns) * $i; }
+    }
+}
+```
+
+## Save grid to array
+
+Because gridstack doesn't track any kind of user-defined widget id there is no reason to make serialization to be part
+of gridstack API. To serialize grid you can simply do something like this (let's say you store widget id inside `data-custom-id` 
+attribute):
+
+```javascript
+var res = _.map($('.grid-stack .grid-stack-item:visible'), function (el) {
+    el = $(el);
+    var node = el.data('_gridstack_node');
+    return {
+        id: el.attr('data-custom-id'),
+        x: node.x,
+        y: node.y,
+        width: node.width,
+        height: node.height
+    };
+});
+alert(JSON.stringify(res));
+```
+
+You can also use `onchange` event if you need to save only changed widgets right away they have been changed. 
+
+
 ## Load grid from array
 
 ```javascript
@@ -485,17 +560,82 @@ _.each(serialization, function (node) {
 });
 ```
 
+If you're using knockout there is no need for such method at all.
+
+## Override resizable/draggable options
+
+You can override default `resizable`/`draggable` options. For instance to enable other then bottom right resizing handle
+you can init gridsack like:
+
+```javascript
+$('.grid-stack').gridstack({
+    resizable: {
+        handles: 'e, se, s, sw, w'
+    }
+});
+```
+
+Note: It's not recommended to enable `nw`, `n`, `ne` resizing handles. Their behaviour may be unexpected.
+
+## IE8 support
+
+Support of IE8 is quite limited and is not a goal at this time. As far as IE8 doesn't support DOM Level 2 I cannot manipulate with
+CSS stylesheet dynamically. As a workaround you can do the following:
+
+- Create `gridstack-ie8.css` for your configuration (sample for grid with cell height of 60px can be found [here](https://gist.github.com/troolee/6edfea5857f4cd73e6f1)).
+- Include this CSS:
+
+```html
+<!--[if lt IE 9]>
+<link rel="stylesheet" href="gridstack-ie8.css"/>
+<![endif]-->
+```
+
+- You can use this python script to generate such kind of CSS:
+
+```python
+#!/usr/bin/env python
+
+height = 60
+margin = 20
+N = 100
+
+print '.grid-stack > .grid-stack-item { min-height: %(height)spx }' % {'height': height}
+
+for i in range(N):
+    h = height * (i + 1) + margin * i
+    print '.grid-stack > .grid-stack-item[data-gs-height="%(index)s"] { height: %(height)spx }' % {'index': i + 1, 'height': h}
+
+for i in range(N):
+    h = height * (i + 1) + margin * i
+    print '.grid-stack > .grid-stack-item[data-gs-min-height="%(index)s"] { min-height: %(height)spx }' % {'index': i + 1, 'height': h}
+
+for i in range(N):
+    h = height * (i + 1) + margin * i
+    print '.grid-stack > .grid-stack-item[data-gs-max-height="%(index)s"] { max-height: %(height)spx }' % {'index': i + 1, 'height': h}
+
+for i in range(N):
+    h = height * i + margin * i
+    print '.grid-stack > .grid-stack-item[data-gs-y="%(index)s"] { top: %(height)spx }' % {'index': i , 'height': h}
+```
+
+There are at least two more issues with gridstack in IE8 with jQueryUI resizable (it seems it doesn't work) and 
+droppable. If you have any suggestions about support of IE8 you are welcome here: https://github.com/troolee/gridstack.js/issues/76 
+
 
 Changes
 =======
 
 #### v0.2.3 (development version)
 
+- allow to override `resizable`/`draggable` options
+- add `disable`/`enable` methods
 - add `get_cell_from_pixel` (thanks to @juchi)
 - AMD support
 - fix nodes sorting
 - improved touch devices support
 - add `always_show_resize_handle` option
+- minor fixes and improvements
 
 #### v0.2.2 (2014-12-23)
 
