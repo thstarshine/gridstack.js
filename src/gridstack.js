@@ -918,7 +918,7 @@
     };
 
     GridStack.prototype.cell_width = function () {
-        var o = this.container.find('.' + this.opts.item_class).first();
+        var o = this.container.find('[data-gs-width]').first();
         return Math.ceil(o.outerWidth() / o.attr('data-gs-width'));
     };
 
