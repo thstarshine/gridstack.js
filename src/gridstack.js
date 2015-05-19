@@ -483,7 +483,6 @@
         this.container.height((this.grid.get_grid_height()) * (this.opts.cell_height + this.opts.vertical_margin) - this.opts.vertical_margin);
 
         var on_resize_handler = function () {
-            self.opts.cell_width = self.cell_width();
             if (self._is_one_column_mode()) {
                 if (one_column_mode)
                     return;
@@ -707,6 +706,7 @@
         el.draggable(_.extend(this.opts.draggable, {
             helper: function () {
                 var item = $(this);
+                self.opts.cell_width = self.cell_width();
                 var width = self.opts.cell_width * item.attr('data-gs-width');
                 var height = self.opts.cell_height * item.attr('data-gs-height');
                 return item.clone().css({'width':width, 'height':height});
@@ -742,6 +742,7 @@
                 var node = $(this).data('_gridstack_node');
                 var gridstack = node.current_gridstack;
 
+                self.opts.cell_width = self.cell_width();
                 var width = Math.round(ui.size.width / self.opts.cell_width),
                     height = Math.round(ui.size.height / self.opts.cell_height);
                 if (!gridstack.grid.can_move_node(node, node.x, node.y, width, height)) {
@@ -918,7 +919,7 @@
     };
 
     GridStack.prototype.cell_width = function () {
-        var o = this.container.find('[data-gs-width]').first();
+        var o = this.container.find('[data-gs-width]:visible').first();
         return Math.ceil(o.outerWidth() / o.attr('data-gs-width'));
     };
 
